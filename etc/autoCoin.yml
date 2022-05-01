@@ -1,0 +1,33 @@
+TrendCsv: "./trend_coins.csv"
+CointCsv: "./coint_coins.csv"
+UmbrellaCsv: "./umbrella_coins.csv"
+WeightCsv: "./etc/files/weight.csv"
+PlatformCsv: "./etc/files/platform.csv"
+CointegrationSrcipt: "./scripts/cointegration.py"
+LogPath: "autoCoins.log"
+DBPath: "autoCoin.db"
+DBType: "mysql"
+
+options:
+  quantity: 15  # 总金额
+  pairing: USDT
+  test: True
+  sl: -5
+  tp: 3
+  enable_tsl: True
+  tsl: -3
+  ttp: 3
+
+email:
+  user: "autocoins@163.com"
+  password : "FHYKNBEUYNBYRGAU"
+  host: "smtp.163.com"
+  port: "465"
+  mailTo: ["524737353@qq.com", "415255404@qq.com", "1459884266@qq.com"]
+
+mysql:
+  user: "root"
+  password : ""
+  host: "127.0.0.1"
+  port: "3306"
+  Database: "autocoins"
