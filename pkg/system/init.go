@@ -1,17 +1,28 @@
 package system
 
 import (
-	"github.com/ytwxy99/autocoins/database"
-	"github.com/ytwxy99/autocoins/pkg/client"
-	"github.com/ytwxy99/autocoins/pkg/configuration"
+	"context"
+
+	"github.com/sirupsen/logrus"
 	"github.com/ytwxy99/autocoins/pkg/utils"
+
+	"github.com/ytwxy99/backtest/pkg/database/driver"
 )
 
-// init system base data
-func Init(authConf *configuration.GateAPIV4, sysConf *configuration.SystemConf) {
-	_, ctx := client.GetClient(authConf)
+func Init(ctx context.Context) (context.Context, error) {
+	sysConf, err := utils.ReadSystemConfig("./etc/autoCoin.yml")
+	if err != nil {
+		logrus.Error("read configure file failed, ", err)
+	}
+
 	utils.InitLog(sysConf.LogPath)
-	db := database.GetDB(sysConf)
-	database.InitDB(db)
-	InitCmd(ctx, sysConf, db)
+	ctx = context.WithValue(ctx, "conf", sysConf)
+	ctx, err = driver.SetupMysql(ctx)
+	if err != nil {
+		return ctx, err
+	}
+
+	driver.Migrate(ctx)
+
+	return ctx, nil
 }
