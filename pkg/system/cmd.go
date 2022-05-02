@@ -10,7 +10,6 @@ import (
 
 // refer: https://github.com/spf13/cobra/blob/v1.2.1/user_guide.md
 func InitCmd(ctx context.Context, sysConf *configuration.SystemConf, db *gorm.DB) {
-	// init action
 	var InitCmd = &cobra.Command{
 		Use:   "init [string to echo]",
 		Short: "Init back test environment",
