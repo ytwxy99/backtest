@@ -76,7 +76,7 @@ type HistoryDay struct {
 	Price    string    `gorm:"type:varchar(32)"`
 }
 
-func (HistoryDay HistoryDay) TableName() string {
+func (historyDay HistoryDay) TableName() string {
 	return "history_day"
 }
 

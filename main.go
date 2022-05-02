@@ -2,10 +2,8 @@ package main
 
 import (
 	"context"
-
 	"github.com/sirupsen/logrus"
 
-	"github.com/ytwxy99/backtest/pkg/database"
 	"github.com/ytwxy99/backtest/pkg/system"
 )
 
@@ -17,6 +15,4 @@ func main() {
 	if err != nil {
 		logrus.Error("setup mysql failed: ", err)
 	}
-
-	database.GetAllHistoryDay(ctx)
 }
