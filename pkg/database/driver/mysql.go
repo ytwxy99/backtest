@@ -27,10 +27,6 @@ func SetupMysql(ctx context.Context) (context.Context, error) {
 func Migrate(ctx context.Context) {
 	db := ctx.Value("DbSession").(*gorm.DB)
 
-	db.AutoMigrate(&database.Order{})
-	db.AutoMigrate(&database.Sold{})
-	db.AutoMigrate(&database.InOrder{})
+	db.AutoMigrate(&database.Publish{})
 	db.AutoMigrate(&database.HistoryDay{})
-	db.AutoMigrate(&database.Cointegration{})
-	db.AutoMigrate(&database.TradeDetail{})
 }

@@ -24,5 +24,7 @@ func Init(ctx context.Context) (context.Context, error) {
 
 	driver.Migrate(ctx)
 
+	InitCmd(ctx)
+
 	return ctx, nil
 }

@@ -1,15 +1,20 @@
 package cqrs
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"github.com/sirupsen/logrus"
+
+	"github.com/ytwxy99/backtest/pkg/database"
+	"github.com/ytwxy99/backtest/pkg/utils"
 )
 
 type SubscribeBus struct{}
 
 // Subscribe implements the method of the bus.EventBus interface.
-func (subscribeBus *SubscribeBus) Subscribe() error {
+func (subscribeBus *SubscribeBus) Subscribe(ctx context.Context) error {
 	logrus.Info("back test subscribe bus system is starting !!")
 
 	// set pprof service
@@ -17,11 +22,28 @@ func (subscribeBus *SubscribeBus) Subscribe() error {
 		http.ListenAndServe("localhost:6060", nil)
 	}()
 
+	go func() {
+		for {
+			time.Sleep(time.Duration(1) * time.Second)
+			publishes, err := database.GetAllPublishes(ctx)
+			if err != nil {
+				logrus.Errorf("get all publishes failed: ", err)
+			}
+
+			for _, publish := range publishes {
+				if publish.Status == utils.NewPublish {
+					BusEvents <- publish.Event
+					publish.Status = utils.Published
+					publish.UpdatePublish(ctx)
+				}
+			}
+		}
+	}()
+
 	// handle all kinds of events
-	i := 1
-	for i < 2 {
+	for {
 		select {
-		case event := <-Events:
+		case event := <-BusEvents:
 			logrus.Info("Fetch a new event: ", event)
 		}
 	}

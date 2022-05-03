@@ -1,15 +1,32 @@
 package cqrs
 
-import "context"
+import (
+	"context"
+
+	"github.com/sirupsen/logrus"
+
+	"github.com/ytwxy99/backtest/pkg/database"
+)
 
 type PublishBus struct {
 	Contract string
-	Policy   string
+	Event    string
+	Status   string
 }
 
 // Publish implements the method of the bus.EventBus interface.
-func (PublishBus *PublishBus) Publish(ctx context.Context, event string) error {
-	Events <- event
-	//todo(wangxiaoyu), define all kinds of enents
+func (publishBus *PublishBus) Publish(ctx context.Context) error {
+	publish := database.Publish{
+		Contract: publishBus.Contract,
+		Event:    publishBus.Event,
+		Status:   publishBus.Status,
+	}
+
+	err := publish.AddPublish(ctx)
+	if err != nil {
+		logrus.Error("add publish record faild: ", err)
+		return err
+	}
+
 	return nil
 }
