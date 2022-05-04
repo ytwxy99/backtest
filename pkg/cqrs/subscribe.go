@@ -44,7 +44,17 @@ func (subscribeBus *SubscribeBus) Subscribe(ctx context.Context) error {
 	for {
 		select {
 		case event := <-BusEvents:
-			logrus.Info("Fetch a new event: ", event)
+			go func() {
+				asynchronous := &Asynchronous{
+					Event: event,
+				}
+				asynchronous.Dispatch(ctx)
+			}()
+
+			select {
+			case response := <-DispatchResponse:
+				logrus.Infof("handle the specified '%s' event success, the response is '%s'.", event, response)
+			}
 		}
 	}
 	return nil
