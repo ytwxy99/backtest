@@ -4,8 +4,8 @@ import (
 	"context"
 )
 
-var BusEvents = make(chan string)
-var DispatchResponse = make(chan string)
+var BusEvents = make(chan map[string]string)
+var DispatchResponse = make(chan map[string]string)
 
 // EventBus is a local event bus that delegates handling of published events
 // to all matching registered handlers, in order of registration.

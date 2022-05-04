@@ -32,7 +32,11 @@ func (subscribeBus *SubscribeBus) Subscribe(ctx context.Context) error {
 
 			for _, publish := range publishes {
 				if publish.Status == utils.NewPublish {
-					BusEvents <- publish.Event
+					publishMetadata := map[string]string{
+						"event":    publish.Event,
+						"contract": publish.Contract,
+					}
+					BusEvents <- publishMetadata
 					publish.Status = utils.Published
 					publish.UpdatePublish(ctx)
 				}
@@ -45,10 +49,10 @@ func (subscribeBus *SubscribeBus) Subscribe(ctx context.Context) error {
 		select {
 		case event := <-BusEvents:
 			go func() {
-				asynchronous := &Asynchronous{
-					Event: event,
+				asynchronousDispatchMetadata := &AsynchronousDispatchMetadata{
+					Metadata: event,
 				}
-				asynchronous.Dispatch(ctx)
+				asynchronousDispatchMetadata.Dispatch(ctx)
 			}()
 
 			select {
@@ -57,5 +61,6 @@ func (subscribeBus *SubscribeBus) Subscribe(ctx context.Context) error {
 			}
 		}
 	}
+
 	return nil
 }

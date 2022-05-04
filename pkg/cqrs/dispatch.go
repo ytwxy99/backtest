@@ -3,14 +3,32 @@ package cqrs
 import (
 	"context"
 	"github.com/sirupsen/logrus"
+	"github.com/ytwxy99/backtest/pkg/cqrs/events"
+	"github.com/ytwxy99/backtest/pkg/utils"
+	"strings"
 )
 
-type Asynchronous struct {
-	Event string
+var event events.Event
+
+type AsynchronousDispatchMetadata struct {
+	Metadata map[string]string
 }
 
-func (asynchronous *Asynchronous) Dispatch (ctx context.Context) {
-	logrus.Info("Fetch a new event and dispatch it : ", asynchronous.Event)
+func (asynchronousDispatchMetadata *AsynchronousDispatchMetadata) Dispatch(ctx context.Context) error {
+	logrus.Info("Fetch a new event and dispatch it : ", asynchronousDispatchMetadata.Metadata)
 	//todo(wangxiaoyu), implement detail
-	DispatchResponse<- asynchronous.Event
+	if strings.Contains(asynchronousDispatchMetadata.Metadata["event"], utils.Cointegration) {
+		event = &events.CointegrationEvent{
+			EventMetadata: asynchronousDispatchMetadata.Metadata,
+		}
+	}
+
+	response, err := event.DoEvent(ctx)
+	if err != nil {
+		logrus.Error("Do event failed: ", err)
+	}
+
+	asynchronousDispatchMetadata.Metadata["response"] = response
+	DispatchResponse <- asynchronousDispatchMetadata.Metadata
+	return nil
 }
