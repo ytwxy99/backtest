@@ -39,3 +39,9 @@ func (historyDay *HistoryDay) FetchHistoryDay(ctx context.Context) ([]*HistoryDa
 
 	return histoies, nil
 }
+
+// AddHistoryFourHour add a 4h history data
+func (historyFourHour *HistoryFourHour) AddHistoryFourHour(ctx context.Context) error {
+	tx := ctx.Value("DbSession").(*gorm.DB).Create(historyFourHour)
+	return tx.Error
+}

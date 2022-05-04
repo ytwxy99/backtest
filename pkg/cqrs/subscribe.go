@@ -57,8 +57,13 @@ func (subscribeBus *SubscribeBus) Subscribe(ctx context.Context) error {
 
 			select {
 			case response := <-DispatchResponse:
-				logrus.Infof("handle the specified '%s' event success, the response is '%s'.", event, response)
+				logrus.Infof("event success, the response is '%s'.", response)
+			case err := <-ErrResponse:
+				if err != nil {
+					logrus.Error("operate event failed: ", err)
+				}
 			}
+
 		}
 	}
 

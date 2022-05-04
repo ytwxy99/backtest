@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/spf13/cobra"
+
 	"github.com/ytwxy99/backtest/pkg/cqrs"
 	"github.com/ytwxy99/backtest/pkg/utils"
 )
@@ -16,8 +17,8 @@ func InitCmd(ctx context.Context) {
 		Run: func(cmd *cobra.Command, args []string) {
 			//todo(wangxiaoyu), test case
 			(&cqrs.PublishBus{
-				Contract: "BTC_USDT",
-				Event:    "cointegration",
+				Contract: "*",
+				Event:    "init",
 				Status:   utils.NewPublish,
 			}).Publish(ctx)
 		},

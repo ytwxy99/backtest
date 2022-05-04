@@ -27,3 +27,13 @@ type HistoryDay struct {
 func (historyDay HistoryDay) TableName() string {
 	return "history_day"
 }
+
+type HistoryFourHour struct {
+	Contract string    `gorm:"primary_key;index:contract_idx;type:varchar(32)"`
+	Time     time.Time `gorm:"primary_key;index:time_idx"`
+	Price    string    `gorm:"type:varchar(32)"`
+}
+
+func (historyFourHour HistoryFourHour) TableName() string {
+	return "history_four_hour"
+}
