@@ -2,11 +2,9 @@ package events
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/sirupsen/logrus"
-
-	"github.com/ytwxy99/backtest/pkg/database"
+	"github.com/ytwxy99/backtest/pkg/trade/target"
+	"github.com/ytwxy99/backtest/pkg/utils"
 )
 
 type CointegrationEvent struct {
@@ -14,14 +12,12 @@ type CointegrationEvent struct {
 }
 
 func (cointegrationEvent *CointegrationEvent) DoEvent(ctx context.Context) (string, error) {
-	history := &database.HistoryDay{
-		Contract: cointegrationEvent.EventMetadata["contract"],
+	if cointegrationEvent.EventMetadata["contract"] == utils.BTC {
+		btcTarget := &target.CointBtcTarget{
+			TargetMetadata: cointegrationEvent.EventMetadata,
+		}
+		btcTarget.SearchTarget(ctx)
 	}
-	histories, err := history.FetchHistoryDay(ctx)
-	if err != nil {
-		logrus.Error("Fetach history data failed: ", err)
-	}
-	fmt.Println(len(histories))
 
-	return "", nil
+	return "coint", nil
 }
