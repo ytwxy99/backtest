@@ -15,4 +15,7 @@ const (
 
 	// database
 	DBHistoryUniq = "Duplicate entry"
+
+	// coins
+	BTC = "BTC_USDT"
 )

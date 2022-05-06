@@ -15,8 +15,6 @@ import (
 	"github.com/ytwxy99/backtest/pkg/utils/market"
 )
 
-
-
 type InitEvent struct {
 	EventMetadata map[string]string
 }
@@ -47,11 +45,11 @@ func (initEvent *InitEvent) DoEvent(ctx context.Context) (string, error) {
 			}
 			history := &database.HistoryFourHour{
 				Contract: coin,
-				Price: market[2],
-				Time: timeTrans,
+				Price:    market[2],
+				Time:     timeTrans,
 			}
 			if err = history.AddHistoryFourHour(ctx); err != nil {
-				if strings.Contains(err.Error(), utils.DBHistoryUniq) {
+				if !strings.Contains(err.Error(), utils.DBHistoryUniq) {
 					logrus.Error("add 4h history record failed: ", err)
 					return err.Error(), err
 				}

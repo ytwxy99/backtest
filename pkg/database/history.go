@@ -45,3 +45,24 @@ func (historyFourHour *HistoryFourHour) AddHistoryFourHour(ctx context.Context) 
 	tx := ctx.Value("DbSession").(*gorm.DB).Create(historyFourHour)
 	return tx.Error
 }
+
+// FetchHistoryFourHour get specified coin 4h history prices
+func (historyFourHour *HistoryFourHour) FetchHistoryFourHour(ctx context.Context) ([]*HistoryFourHour, error) {
+	histoies := []*HistoryFourHour{}
+	rows, err := ctx.Value("DbSession").(*gorm.DB).Table("history_four_hour").
+		Where("contract = ?", historyFourHour.Contract).Rows()
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		history := &HistoryFourHour{}
+		if err := ctx.Value("DbSession").(*gorm.DB).ScanRows(rows, history); err != nil {
+			return nil, err
+		}
+
+		histoies = append(histoies, history)
+	}
+
+	return histoies, nil
+}
