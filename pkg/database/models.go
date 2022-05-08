@@ -44,6 +44,7 @@ type Order struct {
 	Contract      string
 	Fee_currency  string
 	Price         string
+	SoldPrice     string
 	Amount        float32
 	Time          int64
 	Tp            float32

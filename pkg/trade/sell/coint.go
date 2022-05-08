@@ -79,11 +79,17 @@ func (cointSell *CointSell) Sell(ctx context.Context) error {
 			}
 
 			if len(orders) > 0 {
+				order.SoldPrice = cointSell.Histories[cointSell.Index].Price
+				err = order.UpdateOrder(ctx)
+				if err != nil {
+					logrus.Error("update order failed: ", err)
+					return err
+				}
+
 				if err := order.DeleteOrder(ctx); err != nil {
 					logrus.Errorf("Sell order failed, the order detail is %s, the error is %s.", order, err)
 					return err
 				}
-				logrus.Error(cointSell.Histories[cointSell.Index].Price)
 			}
 		}
 	}
@@ -141,11 +147,17 @@ func (cointSell *CointSell) Sell(ctx context.Context) error {
 			}
 
 			if len(orders) > 0 {
+				order.SoldPrice = cointSell.Histories[cointSell.Index].Price
+				err = order.UpdateOrder(ctx)
+				if err != nil {
+					logrus.Error("update order failed: ", err)
+					return err
+				}
+
 				if err := order.DeleteOrder(ctx); err != nil {
 					logrus.Errorf("Sell order failed, the order detail is %s, the error is %s.", order, err)
 					return err
 				}
-				logrus.Error(cointSell.Histories[cointSell.Index].Price)
 			}
 		}
 	}

@@ -38,3 +38,10 @@ func (order *Order) DeleteOrder(ctx context.Context) error {
 		Where("contract = ? and direction = ?", order.Contract, order.Direction).Delete(order)
 	return tx.Error
 }
+
+// UpdateOrder update a oder
+func (order *Order) UpdateOrder(ctx context.Context) error {
+	tx := ctx.Value("DbSession").(*gorm.DB).Table("orders").
+		Where("contract = ? and direction = ? and deleted_at is null", order.Contract, order.Direction).Updates(order)
+	return tx.Error
+}
