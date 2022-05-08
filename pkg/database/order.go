@@ -15,7 +15,7 @@ func (order *Order) AddOrder(ctx context.Context) error {
 func (order *Order) FetchOrder(ctx context.Context) ([]*Order, error) {
 	orders := make([]*Order, 0)
 	rows, err := ctx.Value("DbSession").(*gorm.DB).Table("orders").
-		Where("contract = ? and direction = ?", order.Contract, order.Direction).Rows()
+		Where("contract = ? and direction = ? and deleted_at is null", order.Contract, order.Direction).Rows()
 	if err != nil {
 		return nil, err
 	}
@@ -30,4 +30,11 @@ func (order *Order) FetchOrder(ctx context.Context) ([]*Order, error) {
 	}
 
 	return orders, nil
+}
+
+// DeleteOrder add a oder
+func (order *Order) DeleteOrder(ctx context.Context) error {
+	tx := ctx.Value("DbSession").(*gorm.DB).Table("orders").
+		Where("contract = ? and direction = ?", order.Contract, order.Direction).Delete(order)
+	return tx.Error
 }

@@ -7,8 +7,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/ytwxy99/autocoins/pkg/configuration"
 
-	"github.com/ytwxy99/backtest/pkg/trade"
 	"github.com/ytwxy99/backtest/pkg/database"
+	"github.com/ytwxy99/backtest/pkg/trade"
+	"github.com/ytwxy99/backtest/pkg/trade/sell"
 	"github.com/ytwxy99/backtest/pkg/utils"
 	"github.com/ytwxy99/backtest/pkg/utils/market"
 )
@@ -127,6 +128,20 @@ func (target *CointBtcTarget) SearchTarget(ctx context.Context) map[string]inter
 			}
 			if err := buyOrder.Buy(ctx); err != nil {
 				logrus.Error("coint back test terminal, the reason is ", err)
+			}
+		}
+
+		// judge sell point
+		err = (&sell.CointSell{
+			Contract:  histories[i].Contract,
+			Index:     i,
+			Weights:   weights,
+			Histories: histories,
+		}).Sell(ctx)
+
+		if err != nil {
+			return map[string]interface{}{
+				target.TargetMetadata["contract"]: 0,
 			}
 		}
 	}
