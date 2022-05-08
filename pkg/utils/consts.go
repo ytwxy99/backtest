@@ -18,4 +18,8 @@ const (
 
 	// coins
 	BTC = "BTC_USDT"
+
+	// trade
+	Up   = "up"
+	Down = "down"
 )

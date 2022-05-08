@@ -30,4 +30,5 @@ func Migrate(ctx context.Context) {
 	db.AutoMigrate(&database.Publish{})
 	db.AutoMigrate(&database.HistoryDay{})
 	db.AutoMigrate(&database.HistoryFourHour{})
+	db.AutoMigrate(&database.Order{})
 }

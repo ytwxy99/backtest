@@ -37,3 +37,31 @@ type HistoryFourHour struct {
 func (historyFourHour HistoryFourHour) TableName() string {
 	return "history_four_hour"
 }
+
+type Order struct {
+	gorm.Model
+
+	Contract      string
+	Fee_currency  string
+	Price         string
+	Amount        float32
+	Time          int64
+	Tp            float32
+	Sl            float32
+	Ttp           float32
+	Tsl           float32
+	Text          string
+	Status        string
+	Typee         string
+	Account       string
+	Side          string
+	Iceberg       string
+	Left          float32
+	Fee           float32
+	Amount_filled float32
+	Direction     string
+}
+
+func (order Order) TableName() string {
+	return "orders"
+}
