@@ -19,7 +19,6 @@ type CointBtcTarget struct {
 }
 
 func (target *CointBtcTarget) SearchTarget(ctx context.Context) map[string]interface{} {
-
 	histories, err := (&database.HistoryFourHour{
 		Contract: target.TargetMetadata["contract"],
 	}).FetchHistoryFourHour(ctx)
@@ -35,96 +34,32 @@ func (target *CointBtcTarget) SearchTarget(ctx context.Context) map[string]inter
 	}
 
 	for i := 22; i < len(histories); i++ {
-		conditionsRising := map[string]bool{}
-		conditionsFalling := map[string]bool{}
-
-		average := &market.Average{
-			CurrencyPair: target.TargetMetadata["contract"],
-			Level:        utils.Level4Hour,
-			MA:           utils.MA21,
-			Markets:      histories,
-		}
-
 		// for rising market
-		btcRisingCondition := conditionUpMonitor(target.TargetMetadata["contract"], 1.0, i, histories)
-		priceRisingCondition := utils.StringToFloat64(histories[i].Price) > average.Average(false, i)
-
-		for _, weight := range weights {
-			weight_histories, err := (&database.HistoryFourHour{
-				Contract: weight,
-			}).FetchHistoryFourHour(ctx)
-			if err != nil {
-				logrus.Error("fetch 4h history data failed: ", err)
-				return nil
-			}
-
-			if len(weight_histories) != len(histories) {
-				logrus.Errorf("weight coins history data error: the length is %s, the btc length is %s, the coin is %s", len(weight_histories), len(histories), weight)
-				return nil
-			}
-
-			conditionsRising[weight] = conditionUpMonitor(weight, 1.0, i, weight_histories)
-		}
+		btcRisingCondition := conditionUpMonitor(target.TargetMetadata["contract"], 1.0015, i, histories)
 
 		// for falling market
-		btcFallingCondition := conditionDownMonitor(target.TargetMetadata["contract"], 1.0, i, histories)
-		priceFallingCondition := utils.StringToFloat64(histories[i].Price) < average.Average(false, i)
-
-		for _, weight := range weights {
-			weight_histories, err := (&database.HistoryFourHour{
-				Contract: weight,
-			}).FetchHistoryFourHour(ctx)
-			if err != nil {
-				logrus.Error("fetch 4h history data failed: ", err)
-				return nil
-			}
-
-			if len(weight_histories) != len(histories) {
-				logrus.Errorf("weight coins history data error: the length is %s, the coin is %s", len(weight_histories), weight)
-				return nil
-			}
-
-			conditionsFalling[weight] = conditionDownMonitor(weight, 1.0, i, weight_histories)
-		}
-
-		// judge rising weight
-		countUp := 0
-		allUp := 0
-		for _, condition := range conditionsRising {
-			if condition {
-				countUp++
-			}
-			allUp++
-		}
-
-		// judge falling weight
-		countDown := 0
-		allDown := 0
-		for _, condition := range conditionsFalling {
-			if condition {
-				countDown++
-			}
-			allDown++
-		}
+		btcFallingCondition := conditionDownMonitor(target.TargetMetadata["contract"], 1.0015, i, histories)
 
 		// rising market buy point
-		if float32(countUp)/float32(allUp) >= 0.7 && btcRisingCondition && priceRisingCondition && averageDiff(target.TargetMetadata["contract"], utils.Level4Hour, i, histories) {
-
+		if btcRisingCondition {
 			buyOrder := trade.BuyOrder{
 				Contract:  histories[i].Contract,
 				Price:     histories[i].Price,
 				Direction: utils.Up,
+				BuyTime:   histories[i].Time,
 			}
 			if err := buyOrder.Buy(ctx); err != nil {
 				logrus.Error("coint back test terminal, the reason is ", err)
 			}
 		}
 
-		if float32(countDown)/float32(allDown) >= 0.7 && btcFallingCondition && priceFallingCondition && averageDiff(target.TargetMetadata["contract"], utils.Level4Hour, i, histories) {
+		// falling market buy point
+		if btcFallingCondition {
 			buyOrder := trade.BuyOrder{
 				Contract:  histories[i].Contract,
 				Price:     histories[i].Price,
 				Direction: utils.Down,
+				BuyTime:   histories[i].Time,
 			}
 			if err := buyOrder.Buy(ctx); err != nil {
 				logrus.Error("coint back test terminal, the reason is ", err)
@@ -158,13 +93,12 @@ func conditionUpMonitor(coin string, tenAverageDiff float64, index int, markets 
 	}
 	MA21Average := averageArgs.Average(false, index) > averageArgs.Average(true, index)*tenAverageDiff //4h的Average是增长的
 
-	averageArgs.MA = utils.MA10
-	MA10Average := averageArgs.Average(false, index) > averageArgs.Average(true, index)
-
 	averageArgs.MA = utils.MA5
-	MA15Average := averageArgs.Average(false, index) > averageArgs.Average(true, index)
+	MA5Average := averageArgs.Average(false, index) > averageArgs.Average(true, index)
 
-	return MA21Average && MA10Average && MA15Average
+	priceC := utils.StringToFloat64(averageArgs.Markets.([]*database.HistoryFourHour)[index].Price) > averageArgs.Average(false, index)
+
+	return MA21Average && MA5Average && priceC
 }
 
 func conditionDownMonitor(coin string, averageDiff float64, index int, markets []*database.HistoryFourHour) bool {
@@ -176,13 +110,12 @@ func conditionDownMonitor(coin string, averageDiff float64, index int, markets [
 	}
 	MA21Average := averageArgs.Average(false, index)*averageDiff < averageArgs.Average(true, index) //4h的Average是增长的
 
-	averageArgs.MA = utils.MA10
-	MA10Average := averageArgs.Average(false, index) < averageArgs.Average(true, index)
-
 	averageArgs.MA = utils.MA5
-	MA15Average := averageArgs.Average(false, index) < averageArgs.Average(true, index)
+	MA5Average := averageArgs.Average(false, index) < averageArgs.Average(true, index)
 
-	return MA21Average && MA10Average && MA15Average
+	priceC := utils.StringToFloat64(averageArgs.Markets.([]*database.HistoryFourHour)[index].Price) < averageArgs.Average(false, index)
+
+	return MA21Average && MA5Average && priceC
 }
 
 type cSort struct {
@@ -243,5 +176,5 @@ func averageDiff(coin string, level string, index int, markets []*database.Histo
 		}
 	}
 
-	return (max-min)/min > 0.03
+	return (max-min)/min > 0.01
 }

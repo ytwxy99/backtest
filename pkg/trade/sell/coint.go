@@ -27,137 +27,75 @@ func (cointSell *CointSell) Sell(ctx context.Context) error {
 	}
 
 	// for rising
-	countRising := 0
-	risingConditions := map[string]bool{}
-	btcCurrentPrice := utils.StringToFloat64(cointSell.Histories[cointSell.Index].Price)
-	if btcCurrentPrice < average.Average(false, cointSell.Index) {
-		for _, weight := range cointSell.Weights {
-			weightHistories, err := (&database.HistoryFourHour{
-				Contract: weight,
-			}).FetchHistoryFourHour(ctx)
-			if err != nil {
-				logrus.Error("fetch 4h history data failed: ", err)
-				return err
-			}
+	orders, err := (&database.Order{
+		Contract:  cointSell.Contract,
+		Direction: utils.Up,
+	}).FetchOrder(ctx)
+	if err != nil {
+		logrus.Error("fetch orders failed: ", err)
+		return err
+	}
 
-			if len(weightHistories) != len(cointSell.Histories) {
-				logrus.Errorf("weight coins history data error: the length is %s, the coin is %s", len(weightHistories), weight)
-				return err
-			}
+	r1 := average.Average(false, cointSell.Index) <= average.Average(true, cointSell.Index)
+	r2 := len(orders) == 1 && utils.StringToFloat64(cointSell.Histories[cointSell.Index].Price)*1.01 <= utils.StringToFloat64(orders[0].Price)
+	r3 := utils.StringToFloat64(cointSell.Histories[cointSell.Index].Price) < average.Average(false, cointSell.Index)
 
-			averageWeight := &market.Average{
-				CurrencyPair: weight,
-				Level:        utils.Level4Hour,
-				MA:           utils.MA21,
-				Markets:      weightHistories,
-			}
-
-			weightCurrentPrice := utils.StringToFloat64(weightHistories[cointSell.Index].Price)
-			if weightCurrentPrice < averageWeight.Average(false, cointSell.Index) {
-				risingConditions[weight] = true
-			}
+	if r1 || r2 || r3 {
+		// do sell
+		order := &database.Order{
+			Contract:  cointSell.Contract,
+			Direction: utils.Up,
 		}
 
-		// judge falling weight
-		for _, condition := range risingConditions {
-			if condition {
-				countRising++
-			}
-		}
-
-		if float32(countRising)/float32(len(cointSell.Weights)) >= 0.7 {
-			// do sell
-			order := &database.Order{
-				Contract:  cointSell.Contract,
-				Direction: utils.Up,
-			}
-
-			orders, err := order.FetchOrder(ctx)
+		if len(orders) > 0 {
+			order.SoldPrice = cointSell.Histories[cointSell.Index].Price
+			order.SoldTime = cointSell.Histories[cointSell.Index].Time
+			err = order.UpdateOrder(ctx)
 			if err != nil {
-				logrus.Error("fetch orders failed: ", err)
+				logrus.Error("update order failed: ", err)
 				return err
 			}
 
-			if len(orders) > 0 {
-				order.SoldPrice = cointSell.Histories[cointSell.Index].Price
-				err = order.UpdateOrder(ctx)
-				if err != nil {
-					logrus.Error("update order failed: ", err)
-					return err
-				}
-
-				if err := order.DeleteOrder(ctx); err != nil {
-					logrus.Errorf("Sell order failed, the order detail is %s, the error is %s.", order, err)
-					return err
-				}
+			if err := order.DeleteOrder(ctx); err != nil {
+				logrus.Errorf("Sell order failed, the order detail is %s, the error is %s.", order, err)
+				return err
 			}
 		}
 	}
 
 	// for falling
-	countFalling := 0
-	fallingConditions := map[string]bool{}
-	btcCurrentPrice = utils.StringToFloat64(cointSell.Histories[cointSell.Index].Price)
-	if btcCurrentPrice > average.Average(false, cointSell.Index) {
-		for _, weight := range cointSell.Weights {
-			weightHistories, err := (&database.HistoryFourHour{
-				Contract: weight,
-			}).FetchHistoryFourHour(ctx)
-			if err != nil {
-				logrus.Error("fetch 4h history data failed: ", err)
-				return err
-			}
+	orders, err = (&database.Order{
+		Contract:  cointSell.Contract,
+		Direction: utils.Down,
+	}).FetchOrder(ctx)
+	if err != nil {
+		logrus.Error("fetch orders failed: ", err)
+		return err
+	}
 
-			if len(weightHistories) != len(cointSell.Histories) {
-				logrus.Errorf("weight coins history data error: the length is %s, the coin is %s", len(weightHistories), weight)
-				return err
-			}
+	f1 := average.Average(false, cointSell.Index) >= average.Average(true, cointSell.Index)
+	f2 := len(orders) == 1 && utils.StringToFloat64(cointSell.Histories[cointSell.Index].Price) >= utils.StringToFloat64(orders[0].Price)*1.01
+	f3 := utils.StringToFloat64(cointSell.Histories[cointSell.Index].Price) > average.Average(false, cointSell.Index)
 
-			averageWeight := &market.Average{
-				CurrencyPair: weight,
-				Level:        utils.Level4Hour,
-				MA:           utils.MA21,
-				Markets:      weightHistories,
-			}
-
-			weightCurrentPrice := utils.StringToFloat64(weightHistories[cointSell.Index].Price)
-			if weightCurrentPrice > averageWeight.Average(false, cointSell.Index) {
-				fallingConditions[weight] = true
-			}
+	if f1 || f2 || f3 {
+		// do sell
+		order := &database.Order{
+			Contract:  cointSell.Contract,
+			Direction: utils.Down,
 		}
 
-		// judge falling weight
-		for _, condition := range risingConditions {
-			if condition {
-				countFalling++
-			}
-		}
-
-		if float32(countFalling)/float32(len(cointSell.Weights)) >= 0.7 {
-			// do sell
-			order := &database.Order{
-				Contract:  cointSell.Contract,
-				Direction: utils.Down,
-			}
-
-			orders, err := order.FetchOrder(ctx)
+		if len(orders) > 0 {
+			order.SoldPrice = cointSell.Histories[cointSell.Index].Price
+			order.SoldTime = cointSell.Histories[cointSell.Index].Time
+			err = order.UpdateOrder(ctx)
 			if err != nil {
-				logrus.Error("fetch orders failed: ", err)
+				logrus.Error("update order failed: ", err)
 				return err
 			}
 
-			if len(orders) > 0 {
-				order.SoldPrice = cointSell.Histories[cointSell.Index].Price
-				err = order.UpdateOrder(ctx)
-				if err != nil {
-					logrus.Error("update order failed: ", err)
-					return err
-				}
-
-				if err := order.DeleteOrder(ctx); err != nil {
-					logrus.Errorf("Sell order failed, the order detail is %s, the error is %s.", order, err)
-					return err
-				}
+			if err := order.DeleteOrder(ctx); err != nil {
+				logrus.Errorf("Sell order failed, the order detail is %s, the error is %s.", order, err)
+				return err
 			}
 		}
 	}

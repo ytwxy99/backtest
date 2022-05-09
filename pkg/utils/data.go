@@ -46,7 +46,7 @@ func GetOldData(years int, months int, days int) string {
 func StringToFloat32(s string) float32 {
 	f, err := strconv.ParseFloat(s, 32)
 	if err != nil {
-		logrus.Error("string convert to float32 error: %v", s)
+		logrus.Error("string convert to float32 error: ", err)
 		return 0
 	}
 
@@ -57,7 +57,7 @@ func StringToFloat32(s string) float32 {
 func StringToFloat64(s string) float64 {
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
-		logrus.Error("string convert to float32 error: %v", s)
+		logrus.Error("string convert to float32 error: ", err)
 		return 0
 	}
 

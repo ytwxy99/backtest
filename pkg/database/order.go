@@ -32,6 +32,27 @@ func (order *Order) FetchOrder(ctx context.Context) ([]*Order, error) {
 	return orders, nil
 }
 
+// FetchOrderUnscope get specified order
+func (order *Order) FetchOrderUnscope(ctx context.Context) ([]*Order, error) {
+	orders := make([]*Order, 0)
+	rows, err := ctx.Value("DbSession").(*gorm.DB).Table("orders").
+		Where("contract = ? and deleted_at is not null", order.Contract).Rows()
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		order := &Order{}
+		if err := ctx.Value("DbSession").(*gorm.DB).ScanRows(rows, order); err != nil {
+			return nil, err
+		}
+
+		orders = append(orders, order)
+	}
+
+	return orders, nil
+}
+
 // DeleteOrder add a oder
 func (order *Order) DeleteOrder(ctx context.Context) error {
 	tx := ctx.Value("DbSession").(*gorm.DB).Table("orders").

@@ -61,6 +61,8 @@ type Order struct {
 	Fee           float32
 	Amount_filled float32
 	Direction     string
+	BuyTime       time.Time
+	SoldTime      time.Time
 }
 
 func (order Order) TableName() string {

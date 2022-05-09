@@ -32,7 +32,7 @@ func (average *Average) Average(backOff bool, index int) float64 {
 
 		if !backOff {
 			for i, market := range markets {
-				if i >= index-utils.MA21 && i < index {
+				if i > index-utils.MA21 && i <= index {
 					sum = sum + utils.StringToFloat64(market.Price)
 				}
 			}
@@ -40,7 +40,7 @@ func (average *Average) Average(backOff bool, index int) float64 {
 			return sum / float64(utils.MA21)
 		} else {
 			for i, market := range markets {
-				if i >= index-utils.MA21-1 && i < index-1 {
+				if i > index-utils.MA21-1 && i <= index-1 {
 					sum = sum + utils.StringToFloat64(market.Price)
 				}
 			}
@@ -60,7 +60,7 @@ func (average *Average) Average(backOff bool, index int) float64 {
 
 		if !backOff {
 			for i, market := range markets {
-				if i >= index-utils.MA10 && i < index {
+				if i > index-utils.MA10 && i <= index {
 					sum = sum + utils.StringToFloat64(market.Price)
 				}
 			}
@@ -68,7 +68,7 @@ func (average *Average) Average(backOff bool, index int) float64 {
 			return sum / float64(utils.MA10)
 		} else {
 			for i, market := range markets {
-				if i >= index-utils.MA10-1 && i < index-1 {
+				if i > index-utils.MA10-1 && i <= index-1 {
 					sum = sum + utils.StringToFloat64(market.Price)
 				}
 			}
@@ -88,7 +88,7 @@ func (average *Average) Average(backOff bool, index int) float64 {
 
 		if !backOff {
 			for i, market := range markets {
-				if i >= index-utils.MA5 && i < index {
+				if i > index-utils.MA5 && i <= index {
 					sum = sum + utils.StringToFloat64(market.Price)
 				}
 			}
@@ -96,7 +96,7 @@ func (average *Average) Average(backOff bool, index int) float64 {
 			return sum / float64(utils.MA5)
 		} else {
 			for i, market := range markets {
-				if i >= index-utils.MA5-1 && i < index-1 {
+				if i > index-utils.MA5-1 && i <= index-1 {
 					sum = sum + utils.StringToFloat64(market.Price)
 				}
 			}

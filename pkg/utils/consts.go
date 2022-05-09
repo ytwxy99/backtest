@@ -7,6 +7,7 @@ const (
 	Cointegration = "cointegration"
 	Iint          = "init"
 
+	MA30       = 30
 	MA21       = 21
 	MA10       = 10
 	MA5        = 5

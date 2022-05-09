@@ -2,6 +2,8 @@ package trade
 
 import (
 	"context"
+	"time"
+
 	"github.com/sirupsen/logrus"
 	"github.com/ytwxy99/backtest/pkg/database"
 )
@@ -10,6 +12,7 @@ type BuyOrder struct {
 	Contract  string
 	Price     string
 	Direction string
+	BuyTime   time.Time
 }
 
 func (buyOrder *BuyOrder) Buy(ctx context.Context) error {
@@ -17,6 +20,7 @@ func (buyOrder *BuyOrder) Buy(ctx context.Context) error {
 		Contract:  buyOrder.Contract,
 		Price:     buyOrder.Price,
 		Direction: buyOrder.Direction,
+		BuyTime:   buyOrder.BuyTime,
 	}
 
 	orders, err := order.FetchOrder(ctx)

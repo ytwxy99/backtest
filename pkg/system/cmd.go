@@ -24,6 +24,17 @@ func InitCmd(ctx context.Context) {
 		},
 	}
 
+	var Result = &cobra.Command{
+		Use:   "result [string to echo]",
+		Short: "back test result",
+		Run: func(cmd *cobra.Command, args []string) {
+			(&cqrs.Result{
+				Contract:  "BTC_USDT",
+				Direction: utils.Up,
+			}).Subscribe(ctx)
+		},
+	}
+
 	var Subscribe = &cobra.Command{
 		Use:   "subscribe [string to echo]",
 		Short: "Start Subscribe",
@@ -66,6 +77,7 @@ func InitCmd(ctx context.Context) {
 
 	var rootCmd = &cobra.Command{Use: "backtest"}
 	rootCmd.AddCommand(InitCmd)
+	rootCmd.AddCommand(Result)
 	rootCmd.AddCommand(Subscribe)
 	rootCmd.AddCommand(TestCmd)
 	TestCmd.AddCommand(CointegrationCmd)
