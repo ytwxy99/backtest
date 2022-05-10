@@ -28,10 +28,21 @@ func InitCmd(ctx context.Context) {
 		Use:   "result [string to echo]",
 		Short: "back test result",
 		Run: func(cmd *cobra.Command, args []string) {
-			(&cqrs.Result{
-				Contract:  "BTC_USDT",
-				Direction: utils.Up,
-			}).Subscribe(ctx)
+			if len(args) != 0 {
+				if len(args) > 1 {
+					fmt.Println("only one coin can be entered!")
+					return
+				}
+				(&cqrs.Result{
+					Contract:  args[0],
+					Direction: utils.Up,
+				}).Subscribe(ctx)
+			} else {
+				(&cqrs.Result{
+					Contract:  "BTC_USDT",
+					Direction: utils.Up,
+				}).Subscribe(ctx)
+			}
 		},
 	}
 

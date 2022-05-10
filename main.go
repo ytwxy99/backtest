@@ -7,8 +7,6 @@ import (
 	"github.com/ytwxy99/backtest/pkg/system"
 )
 
-type tt string
-
 func main() {
 	ctx := context.Background()
 	ctx, err := system.Init(ctx)
