@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"sort"
 	"strconv"
 	"time"
 
@@ -67,4 +68,26 @@ func StringToFloat64(s string) float64 {
 // Float32ToString float32 convert to string
 func Float32ToString(f float32) string {
 	return strconv.FormatFloat(float64(f), 'g', 10, 64)
+}
+
+type KV struct {
+	Key   string
+	Value float32
+}
+
+// MapSortStringFloat sort map which type is string-float32
+func (*KV) MapSortStringFloat(input map[string]float32) []KV {
+	var kv []KV
+	for key, value := range input {
+		kv = append(kv, KV{
+			Key:   key,
+			Value: value,
+		})
+	}
+
+	sort.Slice(kv, func(i, j int) bool {
+		return kv[i].Value > kv[j].Value // 降序
+	})
+
+	return kv
 }

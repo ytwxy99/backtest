@@ -60,6 +60,12 @@ func (order *Order) DeleteOrder(ctx context.Context) error {
 	return tx.Error
 }
 
+// DeleteALLOrder delete all orders
+func (order *Order) DeleteALLLOrder(ctx context.Context) error {
+	tx := ctx.Value("DbSession").(*gorm.DB).Table("orders").Exec("delete from orders")
+	return tx.Error
+}
+
 // UpdateOrder update a oder
 func (order *Order) UpdateOrder(ctx context.Context) error {
 	tx := ctx.Value("DbSession").(*gorm.DB).Table("orders").

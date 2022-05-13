@@ -2,7 +2,9 @@ package events
 
 import (
 	"context"
+
 	"github.com/ytwxy99/autocoins/pkg/configuration"
+	"github.com/ytwxy99/backtest/pkg/database"
 
 	"github.com/ytwxy99/backtest/pkg/trade/target"
 	"github.com/ytwxy99/backtest/pkg/utils"
@@ -18,6 +20,10 @@ func (cointegrationEvent *CointegrationEvent) DoEvent(ctx context.Context) (stri
 	}
 
 	if btcTarget.TargetMetadata["contract"] == utils.ALL {
+		if err := (&database.Order{}).DeleteALLLOrder(ctx); err != nil {
+			return "coint failed", err
+		}
+
 		coins, err := utils.ReadLines(ctx.Value("conf").(*configuration.SystemConf).WeightCsv)
 		if err != nil {
 			return "coint failed", err
