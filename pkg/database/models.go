@@ -38,6 +38,16 @@ func (historyFourHour HistoryFourHour) TableName() string {
 	return "history_four_hour"
 }
 
+type HistoryThirtyMin struct {
+	Contract string    `gorm:"primary_key;index:contract_idx;type:varchar(32)"`
+	Time     time.Time `gorm:"primary_key;index:time_idx"`
+	Price    string    `gorm:"type:varchar(32)"`
+}
+
+func (historyThirtyMin HistoryThirtyMin) TableName() string {
+	return "history_thirty_min"
+}
+
 type Order struct {
 	gorm.Model
 

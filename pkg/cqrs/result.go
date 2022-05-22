@@ -46,6 +46,7 @@ func (result *Result) Subscribe(ctx context.Context) error {
 		}
 
 		for _, coin := range coins {
+			sum = 0
 			order.Contract = coin
 			orders, err := order.FetchOrderUnscope(ctx)
 			if err != nil {
@@ -54,16 +55,16 @@ func (result *Result) Subscribe(ctx context.Context) error {
 
 			for _, order := range orders {
 				if order.Direction == utils.Up {
-					sum = sum + (utils.StringToFloat32(order.SoldPrice)-utils.StringToFloat32(order.Price))/utils.StringToFloat32(order.Price)
+					sum = sum + (utils.StringToFloat32(order.SoldPrice)-utils.StringToFloat32(order.Price))/utils.StringToFloat32(order.Price)*100
 				} else {
-					sum = sum + (utils.StringToFloat32(order.Price)-utils.StringToFloat32(order.SoldPrice))/utils.StringToFloat32(order.Price)
+					sum = sum + (utils.StringToFloat32(order.Price)-utils.StringToFloat32(order.SoldPrice))/utils.StringToFloat32(order.Price)*100
 				}
 			}
 			statistics[order.Contract] = sum
 		}
 	}
 
-	for _, kv := range (&utils.KV{}).MapSortStringFloat(statistics) {
+	for _, kv := range (&utils.KVs2f32{}).MapSortStringFloat32(statistics) {
 		fmt.Println(kv)
 	}
 

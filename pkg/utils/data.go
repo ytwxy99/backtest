@@ -70,16 +70,36 @@ func Float32ToString(f float32) string {
 	return strconv.FormatFloat(float64(f), 'g', 10, 64)
 }
 
-type KV struct {
+type KVs2f32 struct {
 	Key   string
 	Value float32
 }
 
-// MapSortStringFloat sort map which type is string-float32
-func (*KV) MapSortStringFloat(input map[string]float32) []KV {
-	var kv []KV
+func (*KVs2f32) MapSortStringFloat32(input map[string]float32) []KVs2f32 {
+	var kv []KVs2f32
 	for key, value := range input {
-		kv = append(kv, KV{
+		kv = append(kv, KVs2f32{
+			Key:   key,
+			Value: value,
+		})
+	}
+
+	sort.Slice(kv, func(i, j int) bool {
+		return kv[i].Value > kv[j].Value // 降序
+	})
+
+	return kv
+}
+
+type KVs2i64 struct {
+	Key   string
+	Value int64
+}
+
+func (*KVs2i64) MapSortStringInt64(input map[string]int64) []KVs2i64 {
+	var kv []KVs2i64
+	for key, value := range input {
+		kv = append(kv, KVs2i64{
 			Key:   key,
 			Value: value,
 		})

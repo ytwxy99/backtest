@@ -47,10 +47,10 @@ func (subscribeBus *SubscribeBus) Subscribe(ctx context.Context) error {
 	// handle all kinds of events
 	for {
 		select {
-		case event := <-BusEvents:
+		case eventMetadata := <-BusEvents:
 			go func() {
 				asynchronousDispatchMetadata := &AsynchronousDispatchMetadata{
-					Metadata: event,
+					Metadata: eventMetadata,
 				}
 				asynchronousDispatchMetadata.Dispatch(ctx)
 			}()

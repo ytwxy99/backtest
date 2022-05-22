@@ -61,9 +61,9 @@ func InitCmd(ctx context.Context) {
 	}
 
 	// use trend policy
-	var CointegrationCmd = &cobra.Command{
-		Use:   "coint [string to echo]",
-		Short: "Using cointegration policy to do a test",
+	var Coint4hCmd = &cobra.Command{
+		Use:   "4h [string to echo]",
+		Short: "Using coint 4h policy to do a test",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) != 0 {
 				if len(args) > 1 {
@@ -72,13 +72,39 @@ func InitCmd(ctx context.Context) {
 				}
 				(&cqrs.PublishBus{
 					Contract: args[0],
-					Event:    "cointegration",
+					Event:    "4h",
 					Status:   utils.NewPublish,
 				}).Publish(ctx)
 			} else {
 				(&cqrs.PublishBus{
 					Contract: "BTC_USDT",
-					Event:    "cointegration",
+					Event:    "4h",
+					Status:   utils.NewPublish,
+				}).Publish(ctx)
+			}
+
+		},
+	}
+
+	// use trend policy
+	var Coint30mCmd = &cobra.Command{
+		Use:   "30m [string to echo]",
+		Short: "Using coint 30m policy to do a test",
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) != 0 {
+				if len(args) > 1 {
+					fmt.Println("only one coin can be entered!")
+					return
+				}
+				(&cqrs.PublishBus{
+					Contract: args[0],
+					Event:    "30m",
+					Status:   utils.NewPublish,
+				}).Publish(ctx)
+			} else {
+				(&cqrs.PublishBus{
+					Contract: "BTC_USDT",
+					Event:    "30m",
 					Status:   utils.NewPublish,
 				}).Publish(ctx)
 			}
@@ -91,6 +117,7 @@ func InitCmd(ctx context.Context) {
 	rootCmd.AddCommand(Result)
 	rootCmd.AddCommand(Subscribe)
 	rootCmd.AddCommand(TestCmd)
-	TestCmd.AddCommand(CointegrationCmd)
+	TestCmd.AddCommand(Coint4hCmd)
+	TestCmd.AddCommand(Coint30mCmd)
 	rootCmd.Execute()
 }

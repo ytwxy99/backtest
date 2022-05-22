@@ -2,8 +2,6 @@ package cqrs
 
 import (
 	"context"
-	"strings"
-
 	"github.com/sirupsen/logrus"
 
 	"github.com/ytwxy99/backtest/pkg/cqrs/events"
@@ -19,8 +17,12 @@ type AsynchronousDispatchMetadata struct {
 func (asynchronousDispatchMetadata *AsynchronousDispatchMetadata) Dispatch(ctx context.Context) error {
 	logrus.Info("Fetch a new event and dispatch it : ", asynchronousDispatchMetadata.Metadata)
 	metadata := asynchronousDispatchMetadata.Metadata
-	if strings.Contains(metadata["event"], utils.Cointegration) {
-		event = &events.CointegrationEvent{
+	if metadata["event"] == utils.Coint4h {
+		event = &events.Coin4hEvent{
+			EventMetadata: metadata,
+		}
+	} else if metadata["event"] == utils.Coint30m {
+		event = &events.Coin30mEvent{
 			EventMetadata: metadata,
 		}
 	} else if metadata["event"] == utils.Iint {

@@ -2,21 +2,20 @@ package events
 
 import (
 	"context"
-
 	"github.com/ytwxy99/autocoins/pkg/configuration"
-	"github.com/ytwxy99/backtest/pkg/database"
 
+	"github.com/ytwxy99/backtest/pkg/database"
 	"github.com/ytwxy99/backtest/pkg/trade/target"
 	"github.com/ytwxy99/backtest/pkg/utils"
 )
 
-type CointegrationEvent struct {
+type Coin30mEvent struct {
 	EventMetadata map[string]string
 }
 
-func (cointegrationEvent *CointegrationEvent) DoEvent(ctx context.Context) (string, error) {
-	btcTarget := &target.CointBtcTarget{
-		TargetMetadata: cointegrationEvent.EventMetadata,
+func (coin30mEvent *Coin30mEvent) DoEvent(ctx context.Context) (string, error) {
+	btcTarget := &target.CointTarget{
+		TargetMetadata: coin30mEvent.EventMetadata,
 	}
 
 	if btcTarget.TargetMetadata["contract"] == utils.ALL {
@@ -31,10 +30,10 @@ func (cointegrationEvent *CointegrationEvent) DoEvent(ctx context.Context) (stri
 
 		for _, coin := range coins {
 			btcTarget.TargetMetadata["contract"] = coin
-			btcTarget.SearchTarget(ctx)
+			btcTarget.SearchTarget30M(ctx)
 		}
 	} else {
-		btcTarget.SearchTarget(ctx)
+		btcTarget.SearchTarget30M(ctx)
 	}
 
 	return "coint", nil

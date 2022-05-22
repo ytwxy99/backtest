@@ -14,14 +14,16 @@ import (
 	"github.com/ytwxy99/backtest/pkg/utils/market"
 )
 
-type CointBtcTarget struct {
+type CointTarget struct {
 	TargetMetadata map[string]string
 }
 
-func (target *CointBtcTarget) SearchTarget(ctx context.Context) map[string]interface{} {
+func (target *CointTarget) SearchTarget4H(ctx context.Context) map[string]interface{} {
+	var err error
 	histories, err := (&database.HistoryFourHour{
 		Contract: target.TargetMetadata["contract"],
 	}).FetchHistoryFourHour(ctx)
+
 	if err != nil {
 		logrus.Error("fetch 4h history data failed: ", err)
 		return nil
@@ -35,10 +37,10 @@ func (target *CointBtcTarget) SearchTarget(ctx context.Context) map[string]inter
 
 	for i := 22; i < len(histories); i++ {
 		// for rising market
-		btcRisingCondition := conditionUpMonitor(target.TargetMetadata["contract"], 1.0015, i, histories)
+		btcRisingCondition := conditionUpMonitor4H(target.TargetMetadata["contract"], 1.0015, i, histories)
 
 		// for falling market
-		btcFallingCondition := conditionDownMonitor(target.TargetMetadata["contract"], 1.0015, i, histories)
+		btcFallingCondition := conditionDownMonitor4H(target.TargetMetadata["contract"], 1.0015, i, histories)
 
 		// rising market buy point
 		if btcRisingCondition {
@@ -69,6 +71,7 @@ func (target *CointBtcTarget) SearchTarget(ctx context.Context) map[string]inter
 		// judge sell point
 		err = (&sell.CointSell{
 			Contract:  histories[i].Contract,
+			Level: utils.Level4Hour,
 			Index:     i,
 			Weights:   weights,
 			Histories: histories,
@@ -84,7 +87,7 @@ func (target *CointBtcTarget) SearchTarget(ctx context.Context) map[string]inter
 	return nil
 }
 
-func conditionUpMonitor(coin string, tenAverageDiff float64, index int, markets []*database.HistoryFourHour) bool {
+func conditionUpMonitor4H(coin string, tenAverageDiff float64, index int, markets []*database.HistoryFourHour) bool {
 	averageArgs := &market.Average{
 		CurrencyPair: coin,
 		Level:        utils.Level4Hour,
@@ -101,7 +104,7 @@ func conditionUpMonitor(coin string, tenAverageDiff float64, index int, markets 
 	return MA21Average && MA5Average && priceC
 }
 
-func conditionDownMonitor(coin string, averageDiff float64, index int, markets []*database.HistoryFourHour) bool {
+func conditionDownMonitor4H(coin string, averageDiff float64, index int, markets []*database.HistoryFourHour) bool {
 	averageArgs := &market.Average{
 		CurrencyPair: coin,
 		Level:        utils.Level4Hour,
